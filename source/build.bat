@@ -24,7 +24,7 @@ set IncludeRegistryLib=Advapi32.lib
 set CommonCompilerFlags=%MultithreadCompile% %NoLogo% %RuntimeInformation% %ModernCatchExceptions% %NoExternCExceptions% %DisableOptimization% %GenerateIntrinsics% %WarningLevel% %WarningsAsErrors% %DisplayFullSourcePaths% %GenerateVersion7Debugging% %IgnoreConversionOfGreaterSize% %IgnoreTrunctionOfPointerType%
 
 set CommonLinkerFlags=-opt:ref User32.lib gdi32.lib winmm.lib opengl32.lib %IncludeRegistryLib%
-set ProjectLinkerFlags=
+set ProjectLinkerFlags=glew32.lib glew32s.lib
 
 IF NOT EXIST ..\build  mkdir ..\build
 pushd ..\build

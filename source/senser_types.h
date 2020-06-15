@@ -36,10 +36,14 @@ struct window_params
     HWND Handle;
     HDC DeviceContext;
     MSG Message;
+    HGLRC RenderContext;
     u8 Running;
 };
 
 global_variable window_params WindowParams;
+
+#include "senser_gl.h"
+#include "senser_gl.cpp"
 
 enclosed u8* Allocate(const s32 Size)
 {

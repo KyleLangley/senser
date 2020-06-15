@@ -24,21 +24,28 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
     {
         case WM_CREATE:
         {
+            // Pixel format
             WindowParams.DeviceContext = GetDC(WindowHandle);
             SetupPixelFormat(WindowParams.DeviceContext);
             
+            // Console
             AllocConsole();
             AttachConsole(GetCurrentProcessId());
             freopen("CON", "w", stdout);
             
-            // TODO: OpenGL
+            // GL
+            WindowParams.RenderContext = wglCreateContext(WindowParams.DeviceContext);
+            wglMakeCurrent(WindowParams.DeviceContext, WindowParams.RenderContext);
             
-            
+            InitTestTriangle();
             
             return 0;
         } break;
         case WM_CLOSE:
         {
+            wglMakeCurrent(WindowParams.DeviceContext, nullptr);
+            wglDeleteContext(WindowParams.RenderContext);
+            
             PostQuitMessage(0);
             return 0;
         } break;
@@ -72,14 +79,19 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
         WindowParams.Running = WindowParams.Handle != nullptr;
         while(WindowParams.Running)
         {
+            PeekMessage(&WindowParams.Message, 0, 0, 0, PM_REMOVE);
             if(WindowParams.Message.message == WM_QUIT)
             {
                 WindowParams.Running = false;
                 continue;
             }
             
+            StartFrame();
+            EndFrame();
+            
             TranslateMessage(&WindowParams.Message);
             DispatchMessage(&WindowParams.Message);
+            
         }
     }
     
