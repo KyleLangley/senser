@@ -30,6 +30,8 @@ typedef double r64;
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 
+#include <timeapi.h>
+
 struct window_params
 {
     WNDCLASS Class;
@@ -41,6 +43,31 @@ struct window_params
 };
 
 global_variable window_params WindowParams;
+
+enclosed const r64 FPS_TARGET = 60.f;
+enclosed const r64 FRAME_UPDATE_RATE = 1.f / FPS_TARGET;
+
+struct timing_params
+{
+    LARGE_INTEGER StartTime;
+    LARGE_INTEGER EndTime;
+    LARGE_INTEGER Frequency;
+};
+
+global_variable timing_params TimingParams;
+
+struct timing
+{
+    r64 GameSeconds;
+    r64 FPS;
+    r64 DeltaTime;
+    u8 SleepIsGranular;
+};
+
+global_variable timing Timing;
+
+#define _MATH_IMPLEMENTATION
+#include "senser_math.h"
 
 #include "senser_gl.h"
 #include "senser_gl.cpp"

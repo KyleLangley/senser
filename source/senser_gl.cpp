@@ -53,10 +53,10 @@ enclosed void InitTestTriangle()
     
     r32 Vertices[] = 
     {
-        0.5f,  0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        -0.5f, -0.5f, 0.0f,
-        -0.5f,  0.5f, 0.0f 
+        128.f,  128.f, 0.0f,
+        128.f, -128.f, 0.0f,
+        -128.f, -128.f, 0.0f,
+        -128.f,  128.f, 0.0f 
     };
     
     u32 Indices[] = 
@@ -82,11 +82,30 @@ enclosed void InitTestTriangle()
     
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+    
+    Quad.Position = V3(1920/2+64, 1080/2+64, -1);
+    
+    Quad.Scale = V3(1.f, 1.f, 1.f);
 }
 
 enclosed void TestTriangle()
 {
     glUseProgram(QuadShader.ProgramID);
+    
+    m4 Model = M4Translate(Quad.Position);
+    Model = Model * M4Rotate(Quad.Rotation.Pitch, PITCH);
+    Model = Model * M4Rotate(Quad.Rotation.Yaw, YAW);
+    Model = Model * M4Rotate(Quad.Rotation.Roll, ROLL);
+    Model = Model * M4Scale(Quad.Scale);
+    
+    Quad.Rotation.Yaw += Timing.DeltaTime * 128.f;
+    Quad.Position.Y = 1080/2+64;
+    Quad.Position.Y += sin(Timing.GameSeconds * PI * 1.f) * 128.f;
+    
+    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
+    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
+    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
+    
     glBindVertexArray(Quad.VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }
@@ -96,6 +115,22 @@ enclosed void StartFrame()
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.5f, 0.5f, 0.5f, 1.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    
+    // Default Direction
+    Camera.Rotation.Yaw = -90.f;
+    
+    Camera.Projection = Orthographic(0.f, (r32)1920, 0.f, (r32)1080, NEAR_PLANE, FAR_PLANE);
+    
+    Camera.Front.X = cos(Radians(Camera.Rotation.Yaw)) * cos(Radians(Camera.Rotation.Pitch));
+    Camera.Front.Y = sin(Radians(Camera.Rotation.Pitch));
+    Camera.Front.Z = sin(Radians(Camera.Rotation.Yaw)) * cos(Radians(Camera.Rotation.Pitch));
+    Camera.Front = NormalizeV3(Camera.Front);
+    
+    Camera.Right = NormalizeV3(Cross(Camera.Front, WORLD_UP));
+    Camera.Up = NormalizeV3(Cross(Camera.Right, Camera.Front));
+    
+    Camera.View = LookAt(Camera.Position, AddV3(Camera.Position, Camera.Front), Camera.Up);
+    
     
     TestTriangle();
 }

@@ -1,5 +1,47 @@
 #include "senser_types.h"
 
+enclosed r64 GetSecondsElapsed(LARGE_INTEGER Start, LARGE_INTEGER End)
+{
+    return ((r64)(End.QuadPart - Start.QuadPart) / (r64)TimingParams.Frequency.QuadPart); 
+}
+
+enclosed LARGE_INTEGER GetQueryPerformanceCounter()
+{
+    LARGE_INTEGER Result;
+    QueryPerformanceCounter(&Result);
+    return Result;
+}
+
+enclosed void FrameSleep()
+{
+    TimingParams.StartTime = GetQueryPerformanceCounter();
+    
+    r64 SecondsElapsed = GetSecondsElapsed(TimingParams.EndTime, TimingParams.StartTime);
+    
+    if(SecondsElapsed < FRAME_UPDATE_RATE)
+    {
+        while(SecondsElapsed < FRAME_UPDATE_RATE)
+        {
+            if(Timing.SleepIsGranular)
+            {
+                DWORD SleepTime = (DWORD)(1000.f * (FRAME_UPDATE_RATE - SecondsElapsed));
+                if(SleepTime > 0)
+                {
+                    Sleep(SleepTime);
+                }
+            }
+            
+            SecondsElapsed = GetSecondsElapsed(TimingParams.EndTime, GetQueryPerformanceCounter());
+        }
+    }
+    
+    TimingParams.EndTime = GetQueryPerformanceCounter();
+    
+    Timing.DeltaTime = GetSecondsElapsed(TimingParams.StartTime, TimingParams.EndTime);
+    Timing.GameSeconds += Timing.DeltaTime;
+    Timing.FPS = 1.f / Timing.DeltaTime;
+}
+
 enclosed void SetupPixelFormat(HDC DeviceContext)
 {
     local_persist PIXELFORMATDESCRIPTOR Discriptor = {
@@ -27,6 +69,12 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
             // Pixel format
             WindowParams.DeviceContext = GetDC(WindowHandle);
             SetupPixelFormat(WindowParams.DeviceContext);
+            
+            // Timing
+            QueryPerformanceFrequency(&TimingParams.Frequency);
+            TimingParams.StartTime = GetQueryPerformanceCounter();
+            TimingParams.EndTime = TimingParams.StartTime;
+            Timing.SleepIsGranular = timeBeginPeriod(1) == TIMERR_NOERROR;
             
             // Console
             AllocConsole();
@@ -74,7 +122,7 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
     
     if(RegisterClass(&WindowParams.Class))
     {
-        WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1024, 0, 0, AppInstance, 0);
+        WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1080, 0, 0, AppInstance, 0);
         
         WindowParams.Running = WindowParams.Handle != nullptr;
         while(WindowParams.Running)
@@ -92,6 +140,7 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
             TranslateMessage(&WindowParams.Message);
             DispatchMessage(&WindowParams.Message);
             
+            FrameSleep();
         }
     }
     
