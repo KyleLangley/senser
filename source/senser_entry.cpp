@@ -14,8 +14,6 @@ enclosed LARGE_INTEGER GetQueryPerformanceCounter()
 
 enclosed void FrameSleep()
 {
-    TimingParams.StartTime = GetQueryPerformanceCounter();
-    
     r64 SecondsElapsed = GetSecondsElapsed(TimingParams.EndTime, TimingParams.StartTime);
     
     if(SecondsElapsed < FRAME_UPDATE_RATE)
@@ -40,6 +38,8 @@ enclosed void FrameSleep()
     Timing.DeltaTime = GetSecondsElapsed(TimingParams.StartTime, TimingParams.EndTime);
     Timing.GameSeconds += Timing.DeltaTime;
     Timing.FPS = 1.f / Timing.DeltaTime;
+    
+    printf("%f %f\n", Timing.FPS, FRAME_UPDATE_RATE);
 }
 
 enclosed void SetupPixelFormat(HDC DeviceContext)
@@ -133,6 +133,8 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
                 WindowParams.Running = false;
                 continue;
             }
+            
+            TimingParams.StartTime = GetQueryPerformanceCounter();
             
             StartFrame();
             EndFrame();

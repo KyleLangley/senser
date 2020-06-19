@@ -32,6 +32,9 @@ typedef double r64;
 
 #include <timeapi.h>
 
+#define STB_DEFINE
+#include "stb/stb.h"
+
 struct window_params
 {
     WNDCLASS Class;
@@ -44,7 +47,7 @@ struct window_params
 
 global_variable window_params WindowParams;
 
-enclosed const r64 FPS_TARGET = 60.f;
+enclosed const r64 FPS_TARGET = 90.f;
 enclosed const r64 FRAME_UPDATE_RATE = 1.f / FPS_TARGET;
 
 struct timing_params

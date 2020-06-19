@@ -5,21 +5,33 @@
 #include "glew/glew.h"
 #include "gl/gl.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb/stb_image.h"
+
 enclosed const char* VertexShaderSource = "#version 330 core\n"
 "layout (location = 0) in vec3 aPos;\n"
+"layout (location = 1) in vec3 aColor;\n"
+"layout (location = 2) in vec2 aTexCoord;\n"
+"out vec3 Color;\n"
+"out vec2 TexCoord;\n"
 "uniform mat4 Model; \n"
 "uniform mat4 View; \n"
 "uniform mat4 Projection; \n"
 "void main()\n"
 "{\n"
 "   gl_Position = Projection * View * Model * vec4(aPos, 1.0);\n"
+"   Color = aColor;\n"
+"   TexCoord = vec2(aTexCoord.x, aTexCoord.y);\n"
 "}\0";
 
 enclosed const char* FragmentShaderSource = "#version 330 core\n"
 "out vec4 FragColor;\n"
+"in vec3 Color;\n"
+"in vec2 TexCoord;\n"
+"uniform sampler2D texture_one;\n"
 "void main()\n"
 "{\n"
-"   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+"   FragColor = texture(texture_one, TexCoord) * vec4(Color, 1.0);\n"
 "}\n\0";
 
 struct quad_shader
@@ -29,11 +41,18 @@ struct quad_shader
     s32 ProgramID;
 };
 
+struct texture
+{
+    u32 ID;
+    v3i Params;
+};
+
 struct quad
 {
     u32 VBO;
     u32 VAO;
     u32 EBO;
+    texture Texture;
     
     v3 Position;
     v3 Rotation;
