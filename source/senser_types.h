@@ -30,10 +30,23 @@ typedef double r64;
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 
+enclosed u8* Allocate(const s32 Size)
+{
+    return (u8*)VirtualAlloc(nullptr, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+}
+
+enclosed u8 Deallocate(u8* Ptr)
+{
+    return VirtualFree(Ptr, 0, MEM_RELEASE);
+}
+
 #include <timeapi.h>
 
 #define STB_DEFINE
 #include "stb/stb.h"
+
+#define _MATH_IMPLEMENTATION
+#include "senser_math.h"
 
 struct window_params
 {
@@ -43,6 +56,9 @@ struct window_params
     MSG Message;
     HGLRC RenderContext;
     u8 Running;
+    POINT CursorPoint;
+    
+    v2i Dimensions;
 };
 
 global_variable window_params WindowParams;
@@ -69,21 +85,11 @@ struct timing
 
 global_variable timing Timing;
 
-#define _MATH_IMPLEMENTATION
-#include "senser_math.h"
+#include "senser_map_grid.h"
+#include "senser_map_grid.cpp"
 
 #include "senser_gl.h"
 #include "senser_gl.cpp"
-
-enclosed u8* Allocate(const s32 Size)
-{
-    return (u8*)VirtualAlloc(nullptr, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
-}
-
-enclosed u8 Deallocate(u8* Ptr)
-{
-    return VirtualFree(Ptr, 0, MEM_RELEASE);
-}
 
 #define SENSER_TYPES_H
 #endif

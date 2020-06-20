@@ -123,10 +123,6 @@ enclosed void TestTriangle()
     Model = Model * M4Rotate(Quad.Rotation.Roll, ROLL);
     Model = Model * M4Scale(Quad.Scale);
     
-    Quad.Rotation.Yaw += Timing.DeltaTime * 128.f;
-    Quad.Position.Y = 1080/2+64;
-    Quad.Position.Y += sin(Timing.GameSeconds * PI * 1.f) * 128.f;
-    
     glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
     glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
     glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
@@ -144,7 +140,7 @@ enclosed void StartFrame()
     // Default Direction
     Camera.Rotation.Yaw = -90.f;
     
-    Camera.Projection = Orthographic(0.f, (r32)1920, 0.f, (r32)1080, NEAR_PLANE, FAR_PLANE);
+    Camera.Projection = Orthographic(0.f, (r32)WindowParams.Dimensions.Width, 0.f, (r32)WindowParams.Dimensions.Height, NEAR_PLANE, FAR_PLANE);
     
     Camera.Front.X = cos(Radians(Camera.Rotation.Yaw)) * cos(Radians(Camera.Rotation.Pitch));
     Camera.Front.Y = sin(Radians(Camera.Rotation.Pitch));
@@ -155,7 +151,6 @@ enclosed void StartFrame()
     Camera.Up = NormalizeV3(Cross(Camera.Right, Camera.Front));
     
     Camera.View = LookAt(Camera.Position, AddV3(Camera.Position, Camera.Front), Camera.Up);
-    
     
     TestTriangle();
 }

@@ -38,8 +38,6 @@ enclosed void FrameSleep()
     Timing.DeltaTime = GetSecondsElapsed(TimingParams.StartTime, TimingParams.EndTime);
     Timing.GameSeconds += Timing.DeltaTime;
     Timing.FPS = 1.f / Timing.DeltaTime;
-    
-    printf("%f %f\n", Timing.FPS, FRAME_UPDATE_RATE);
 }
 
 enclosed void SetupPixelFormat(HDC DeviceContext)
@@ -62,6 +60,11 @@ enclosed void SetupPixelFormat(HDC DeviceContext)
 
 LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMessageParam, LPARAM AdditionalMessageParam)
 {
+    auto SnapToGrid = [](const s32 Value)
+    {
+        return (r32)((Value / GRID_SIZE) * GRID_SIZE);
+    };
+    
     switch(Message)
     {
         case WM_CREATE:
@@ -106,6 +109,15 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
         {
             return 0;
         } break;
+        case WM_LBUTTONDOWN:
+        {
+            Quad.Position.X = SnapToGrid(LOWORD(AdditionalMessageParam));
+            Quad.Position.Y = SnapToGrid((WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam)));
+        } break;
+        case WM_RBUTTONDOWN:
+        {
+            printf("Right mouse button down at %d %d\n", WindowParams.CursorPoint.x, WindowParams.CursorPoint.y);
+        } break;
         default:
         break;
     }
@@ -117,16 +129,27 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
 {
     WindowParams.Class.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
     WindowParams.Class.lpfnWndProc = WindowCallback;
+    WindowParams.Class.hCursor = LoadCursor(AppInstance, IDC_ARROW);
     WindowParams.Class.hInstance = AppInstance;
     WindowParams.Class.lpszClassName = "SenserWindowClass";
     
+    
     if(RegisterClass(&WindowParams.Class))
     {
-        WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 1920, 1080, 0, 0, AppInstance, 0);
+        WindowParams.Dimensions.Width = GRID_SIZE * 40;
+        WindowParams.Dimensions.Height = GRID_SIZE * 20;
+        
+        WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, WindowParams.Dimensions.Width, WindowParams.Dimensions.Height, 0, 0, AppInstance, 0);
+        
+        InitMapGrid(WindowParams.Dimensions.Width / 40, WindowParams.Dimensions.Height / 20);
         
         WindowParams.Running = WindowParams.Handle != nullptr;
         while(WindowParams.Running)
         {
+            if(GetCursorPos(&WindowParams.CursorPoint))
+            {
+            }
+            
             PeekMessage(&WindowParams.Message, 0, 0, 0, PM_REMOVE);
             if(WindowParams.Message.message == WM_QUIT)
             {
