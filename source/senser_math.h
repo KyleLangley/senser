@@ -185,7 +185,7 @@ extern "C"
 		{
 			s32 U, V;
 		};
-		
+        
 		struct
 		{
 			s32 Left, Right;
@@ -678,7 +678,7 @@ extern "C"
 	
 	MATH_INLINE v2i V2i(s32 X, s32 Y)
 	{
-		v2i Result = {0, 0};
+		v2i Result = {X, Y};
 		return Result;
 	}
 	

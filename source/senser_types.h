@@ -2,6 +2,10 @@
 
 #if !defined(SENSER_TYPES_H)
 
+#if defined(_WIN32) || defined(_WIN64)
+#define WINDOWS
+#endif
+
 #include <cstdio>
 #include "stdint.h"
 
@@ -27,8 +31,10 @@ typedef double r64;
 #define Gigabytes(Value) Megabytes(Value) * 1024
 #define Terabytes(Value) Gigabytes(Value) * 1024
 
+#ifdef WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
+#endif
 
 enclosed u8* Allocate(const s32 Size)
 {

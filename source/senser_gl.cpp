@@ -29,6 +29,9 @@ enclosed void InitTestTriangle()
     glewExperimental = GL_TRUE;
     GLenum Error = glewInit();
     
+    QuadPositions = (v2i*)Allocate((GRID_COUNT_X * GRID_COUNT_Y) * sizeof(v2i));
+    QuadPositionsIndex = 0;
+    
     QuadShader.VertexID = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(QuadShader.VertexID, 1, &VertexShaderSource, nullptr);
     glCompileShader(QuadShader.VertexID);
@@ -107,28 +110,57 @@ enclosed void InitTestTriangle()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     
-    Quad.Position = V3(1920/2+64, 1080/2+64, -1);
-    Quad.Scale = V3(1.f, 1.f, 1.f);
+    Quad.Layer = DL_Front;
+    Quad.Position = V2i(0, 0);
+    Quad.Scale = V2i(1, 1);
 }
 
 enclosed void TestTriangle()
 {
-    glBindTexture(GL_TEXTURE_2D, Quad.Texture.ID);
+    if(QuadPositionsIndex == 0)
+    {
+        return;
+    }
     
+    glBindTexture(GL_TEXTURE_2D, Quad.Texture.ID);
     glUseProgram(QuadShader.ProgramID);
     
-    m4 Model = M4Translate(Quad.Position);
-    Model = Model * M4Rotate(Quad.Rotation.Pitch, PITCH);
-    Model = Model * M4Rotate(Quad.Rotation.Yaw, YAW);
-    Model = Model * M4Rotate(Quad.Rotation.Roll, ROLL);
-    Model = Model * M4Scale(Quad.Scale);
-    
-    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
-    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
-    glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
-    
-    glBindVertexArray(Quad.VAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    for(s32 Index = 0; Index < QuadPositionsIndex; ++Index)
+    {
+        v2i* Position = &QuadPositions[Index];
+        
+        m4 Model = M4Translate(V3((r32)Position->X, (r32)Position->Y, (r32)-Quad.Layer)) ;
+        Model = Model * M4Rotate((r32)Quad.Rotation, YAW);
+        Model = Model * M4Scale(V3((r32)Quad.Scale.X, (r32)Quad.Scale.Y, 1.f));
+        
+        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
+        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
+        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
+        
+        glBindVertexArray(Quad.VAO);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+}
+
+enclosed void AddToQuadPositions(const v2i NewPosition)
+{
+    if(QuadPositions != nullptr)
+    {
+        bool bSlowCheck = false;
+        for(s32 Index = 0; Index < QuadPositionsIndex; ++Index)
+        {
+            if(QuadPositions[Index].X == NewPosition.X && QuadPositions[Index].Y == NewPosition.Y)
+            {
+                bSlowCheck = true;
+                break;
+            }
+        }
+        
+        if(!bSlowCheck)
+        {
+            QuadPositions[QuadPositionsIndex++] = V2i(NewPosition.X, NewPosition.Y);
+        }
+    }
 }
 
 enclosed void StartFrame()

@@ -60,11 +60,6 @@ enclosed void SetupPixelFormat(HDC DeviceContext)
 
 LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMessageParam, LPARAM AdditionalMessageParam)
 {
-    auto SnapToGrid = [](const s32 Value)
-    {
-        return (r32)((Value / GRID_SIZE) * GRID_SIZE);
-    };
-    
     switch(Message)
     {
         case WM_CREATE:
@@ -111,8 +106,10 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
         } break;
         case WM_LBUTTONDOWN:
         {
-            Quad.Position.X = SnapToGrid(LOWORD(AdditionalMessageParam));
-            Quad.Position.Y = SnapToGrid((WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam)));
+            s32 X = SnapToGrid(LOWORD(AdditionalMessageParam));
+            s32 Y = SnapToGrid(WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam));
+            
+            AddToQuadPositions(V2i(X, Y));
         } break;
         case WM_RBUTTONDOWN:
         {
@@ -136,26 +133,21 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
     
     if(RegisterClass(&WindowParams.Class))
     {
-        WindowParams.Dimensions.Width = GRID_SIZE * 40;
-        WindowParams.Dimensions.Height = GRID_SIZE * 20;
+        WindowParams.Dimensions = V2i(GRID_SIZE * GRID_COUNT_X, GRID_SIZE * GRID_COUNT_Y);
         
         WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, WindowParams.Dimensions.Width, WindowParams.Dimensions.Height, 0, 0, AppInstance, 0);
-        
-        InitMapGrid(WindowParams.Dimensions.Width / 40, WindowParams.Dimensions.Height / 20);
         
         WindowParams.Running = WindowParams.Handle != nullptr;
         while(WindowParams.Running)
         {
-            if(GetCursorPos(&WindowParams.CursorPoint))
-            {
-            }
-            
             PeekMessage(&WindowParams.Message, 0, 0, 0, PM_REMOVE);
             if(WindowParams.Message.message == WM_QUIT)
             {
                 WindowParams.Running = false;
                 continue;
             }
+            
+            GetCursorPos(&WindowParams.CursorPoint);
             
             TimingParams.StartTime = GetQueryPerformanceCounter();
             

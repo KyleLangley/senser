@@ -34,6 +34,13 @@ enclosed const char* FragmentShaderSource = "#version 330 core\n"
 "   FragColor = texture(texture_one, TexCoord) * vec4(Color, 1.0);\n"
 "}\n\0";
 
+enum draw_layer
+{
+    DL_Front = 1,
+    DL_Middle = 2,
+    DL_Back = 3,
+};
+
 struct quad_shader
 {
     s32 VertexID;
@@ -54,9 +61,10 @@ struct quad
     u32 EBO;
     texture Texture;
     
-    v3 Position;
-    v3 Rotation;
-    v3 Scale;
+    draw_layer Layer;
+    v2i Position;
+    s32 Rotation;
+    v2i Scale;
 };
 
 #define WORLD_UP V3(0.f, 1.f, 0.f)
@@ -83,9 +91,13 @@ global_variable camera Camera;
 global_variable quad_shader QuadShader;
 global_variable quad Quad;
 
+enclosed v2i* QuadPositions;
+enclosed s32 QuadPositionsIndex;
+
 enclosed void InitTestTriangle();
 enclosed void TestTriangle();
 
+enclosed void AddToQuadPositions(const v2i NewPosition);
 enclosed void CheckShader(const s32 ID);
 enclosed void CheckProgram(const s32 ID);
 
