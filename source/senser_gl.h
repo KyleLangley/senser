@@ -67,6 +67,12 @@ struct quad
     v2i Scale;
 };
 
+struct quad_position
+{
+    v2i Position;
+    u8 Used;
+};
+
 #define WORLD_UP V3(0.f, 1.f, 0.f)
 #define NEAR_PLANE 0.01f
 #define FAR_PLANE 1000.f
@@ -91,8 +97,8 @@ global_variable camera Camera;
 global_variable quad_shader QuadShader;
 global_variable quad Quad;
 
-enclosed v2i* QuadPositions;
-enclosed s32 QuadPositionsIndex;
+enclosed quad_position* QuadPositions;
+enclosed s32 QuadPositionsAllocationSize;
 
 enclosed void InitTestTriangle();
 enclosed void TestTriangle();

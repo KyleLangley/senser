@@ -106,8 +106,8 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
         } break;
         case WM_LBUTTONDOWN:
         {
-            s32 X = SnapToGrid(LOWORD(AdditionalMessageParam));
-            s32 Y = SnapToGrid(WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam));
+            s32 X = SnapToGrid(LOWORD(AdditionalMessageParam), false);
+            s32 Y = SnapToGrid(WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam), true);
             
             AddToQuadPositions(V2i(X, Y));
         } break;
@@ -130,10 +130,10 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
     WindowParams.Class.hInstance = AppInstance;
     WindowParams.Class.lpszClassName = "SenserWindowClass";
     
-    
     if(RegisterClass(&WindowParams.Class))
     {
-        WindowParams.Dimensions = V2i(GRID_SIZE * GRID_COUNT_X, GRID_SIZE * GRID_COUNT_Y);
+        WindowParams.Dimensions = V2i(1920, 1080);
+        GRID_SIZE = WindowParams.Dimensions.Width / GRID_COUNT_X;
         
         WindowParams.Handle = CreateWindowEx(0, WindowParams.Class.lpszClassName, "Senser", WS_OVERLAPPEDWINDOW|WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, WindowParams.Dimensions.Width, WindowParams.Dimensions.Height, 0, 0, AppInstance, 0);
         

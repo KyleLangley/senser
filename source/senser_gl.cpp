@@ -29,8 +29,8 @@ enclosed void InitTestTriangle()
     glewExperimental = GL_TRUE;
     GLenum Error = glewInit();
     
-    QuadPositions = (v2i*)Allocate((GRID_COUNT_X * GRID_COUNT_Y) * sizeof(v2i));
-    QuadPositionsIndex = 0;
+    QuadPositionsAllocationSize = (GRID_COUNT_X * GRID_COUNT_Y) * sizeof(quad_position);
+    QuadPositions = (quad_position*)Allocate(QuadPositionsAllocationSize);
     
     QuadShader.VertexID = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(QuadShader.VertexID, 1, &VertexShaderSource, nullptr);
@@ -71,13 +71,14 @@ enclosed void InitTestTriangle()
         stbi_image_free(Data);
     }
     
+    const r32 VertPositionConst = GRID_SIZE / 2.f;
     r32 Vertices[] = 
     {
         // positions          // colors           // texture coords
-        32.f,  32.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
-        32.f, -32.f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
-        -32.f, -32.f, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-        -32.f,  32.f, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left 
+        VertPositionConst,  VertPositionConst, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f,   // top right
+        VertPositionConst, -VertPositionConst, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f,   // bottom right
+        -VertPositionConst, -VertPositionConst, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+        -VertPositionConst,  VertPositionConst, 0.0f,  1.0f, 1.0f, 1.0f,   0.0f, 1.0f    // top left 
     };
     
     u32 Indices[] = 
@@ -117,49 +118,43 @@ enclosed void InitTestTriangle()
 
 enclosed void TestTriangle()
 {
-    if(QuadPositionsIndex == 0)
-    {
-        return;
-    }
-    
     glBindTexture(GL_TEXTURE_2D, Quad.Texture.ID);
     glUseProgram(QuadShader.ProgramID);
     
-    for(s32 Index = 0; Index < QuadPositionsIndex; ++Index)
+    for(s32 Index = 0; Index < QuadPositionsAllocationSize / sizeof(quad_position); ++Index)
     {
-        v2i* Position = &QuadPositions[Index];
-        
-        m4 Model = M4Translate(V3((r32)Position->X, (r32)Position->Y, (r32)-Quad.Layer)) ;
-        Model = Model * M4Rotate((r32)Quad.Rotation, YAW);
-        Model = Model * M4Scale(V3((r32)Quad.Scale.X, (r32)Quad.Scale.Y, 1.f));
-        
-        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
-        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
-        glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
-        
-        glBindVertexArray(Quad.VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        quad_position* Position = &QuadPositions[Index];
+        if(Position->Used)
+        {
+            m4 Model = M4Translate(V3((r32)Position->Position.X, (r32)Position->Position.Y, (r32)-Quad.Layer)) ;
+            Model = Model * M4Rotate((r32)Quad.Rotation, YAW);
+            Model = Model * M4Scale(V3((r32)Quad.Scale.X, (r32)Quad.Scale.Y, 1.f));
+            
+            glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Projection"), 1, GL_FALSE, Camera.Projection.Components[0]);
+            glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "View"), 1, GL_FALSE, Camera.View.Components[0]);
+            glUniformMatrix4fv(glGetUniformLocation(QuadShader.ProgramID, "Model"), 1, GL_FALSE, Model.Components[0]);
+            
+            glBindVertexArray(Quad.VAO);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
     }
 }
 
 enclosed void AddToQuadPositions(const v2i NewPosition)
 {
-    if(QuadPositions != nullptr)
+    const s32 X = NewPosition.X / GRID_SIZE;
+    const s32 Y = NewPosition.Y / GRID_SIZE;
+    
+    const s32 Index = ((WindowParams.Dimensions.Width / GRID_SIZE) * (Y - 1)) + X;
+    
+    if(QuadPositions[Index].Used)
     {
-        bool bSlowCheck = false;
-        for(s32 Index = 0; Index < QuadPositionsIndex; ++Index)
-        {
-            if(QuadPositions[Index].X == NewPosition.X && QuadPositions[Index].Y == NewPosition.Y)
-            {
-                bSlowCheck = true;
-                break;
-            }
-        }
-        
-        if(!bSlowCheck)
-        {
-            QuadPositions[QuadPositionsIndex++] = V2i(NewPosition.X, NewPosition.Y);
-        }
+        QuadPositions[Index].Used = false;
+    }
+    else
+    {
+        QuadPositions[Index].Position = V2i(NewPosition.X, NewPosition.Y);
+        QuadPositions[Index].Used = true;
     }
 }
 
