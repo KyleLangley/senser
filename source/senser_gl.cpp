@@ -172,8 +172,8 @@ enclosed void StartFrame()
     Camera.Front.X = cos(Radians(Camera.Rotation.Yaw)) * cos(Radians(Camera.Rotation.Pitch));
     Camera.Front.Y = sin(Radians(Camera.Rotation.Pitch));
     Camera.Front.Z = sin(Radians(Camera.Rotation.Yaw)) * cos(Radians(Camera.Rotation.Pitch));
-    Camera.Front = NormalizeV3(Camera.Front);
     
+    Camera.Front = NormalizeV3(Camera.Front);
     Camera.Right = NormalizeV3(Cross(Camera.Front, WORLD_UP));
     Camera.Up = NormalizeV3(Cross(Camera.Right, Camera.Front));
     

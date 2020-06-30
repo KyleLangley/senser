@@ -31,14 +31,38 @@ typedef double r64;
 #define Gigabytes(Value) Megabytes(Value) * 1024
 #define Terabytes(Value) Gigabytes(Value) * 1024
 
+/*
+enclosed const char* SizingNames[4] = {"Kilobytes", "Megabytes", "Gigabytes", "Terabytes"};
+enclosed void GetSize(const s32 Value, char*& Out)
+{
+    s32 Sizing = 0;
+    s32 NewValue = Value % 1024;
+    if(NewValue % 1024 > 1024)
+    {
+        Sizing++;
+        Count++;
+        GetSize(NewValue, Out);
+    }
+    
+    sprintf(&Out[0], "%d %s.%d\n", Count, SizingNames[Sizing], NewValue);
+}
+*/
+
 #ifdef WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include "windows.h"
 #endif
 
+#include "stdlib.h"
+
 enclosed u8* Allocate(const s32 Size)
 {
-    return (u8*)VirtualAlloc(nullptr, Size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+    return (u8*)VirtualAlloc(nullptr, Size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+}
+
+enclosed u8* Reallocate(u8* Ptr, const s32 Size)
+{
+    return (u8*)VirtualAlloc(Ptr, Size, MEM_COMMIT, PAGE_READWRITE);
 }
 
 enclosed u8 Deallocate(u8* Ptr)
@@ -95,6 +119,7 @@ global_variable timing Timing;
 #include "senser_map_grid.cpp"
 
 #include "senser_gl.h"
+#include "senser_map_serialize.cpp"
 #include "senser_gl.cpp"
 
 #define SENSER_TYPES_H

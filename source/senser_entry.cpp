@@ -115,6 +115,16 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
         {
             printf("Right mouse button down at %d %d\n", WindowParams.CursorPoint.x, WindowParams.CursorPoint.y);
         } break;
+        case WM_KEYDOWN:
+        {
+            switch(WindowMessageParam)
+            {
+                case VK_F1:
+                {
+                    WriteMapFile("Testing.test", QuadPositions, QuadPositionsAllocationSize / sizeof(quad_position));
+                } break;
+            }
+        } break;
         default:
         break;
     }
