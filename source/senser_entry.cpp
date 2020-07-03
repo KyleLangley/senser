@@ -121,7 +121,11 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
             {
                 case VK_F1:
                 {
-                    WriteMapFile("Testing.test", QuadPositions, QuadPositionsAllocationSize / sizeof(quad_position));
+                    WriteMapFile("Testing.map", QuadPositions, QuadPositionsAllocationSize / sizeof(quad_position));
+                } break;
+                case VK_F2:
+                {
+                    OpenMapFile("Testing.map", QuadPositions);
                 } break;
             }
         } break;

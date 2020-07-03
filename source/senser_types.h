@@ -31,6 +31,8 @@ typedef double r64;
 #define Gigabytes(Value) Megabytes(Value) * 1024
 #define Terabytes(Value) Gigabytes(Value) * 1024
 
+#define Assert(Exp) if(!(Exp)) {*(int *)0 = 0;}
+
 /*
 enclosed const char* SizingNames[4] = {"Kilobytes", "Megabytes", "Gigabytes", "Terabytes"};
 enclosed void GetSize(const s32 Value, char*& Out)
