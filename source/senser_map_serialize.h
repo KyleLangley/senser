@@ -17,6 +17,5 @@ enclosed char* GetSourceDirectory();
 enclosed u8 WriteMapFile(const char* FileName, quad_position*& Buffer, const s32 BufferCount);
 enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer);
 
-
 #define SENSER_MAP_SERIALIZE_H
 #endif

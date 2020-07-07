@@ -5,6 +5,10 @@
 #include "glew/glew.h"
 #include "gl/gl.h"
 
+#define IMGUI_IMPL_OPENGL_LOADER_GLEW
+#include "imgui/imgui.h"
+#include "imgui/examples/imgui_impl_opengl3.h"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb/stb_image.h"
 

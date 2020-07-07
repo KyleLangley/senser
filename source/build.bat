@@ -25,6 +25,7 @@ set CommonCompilerFlags=%MultithreadCompile% %NoLogo% %RuntimeInformation% %Mode
 
 set CommonLinkerFlags=-opt:ref User32.lib gdi32.lib winmm.lib opengl32.lib %IncludeRegistryLib%
 set ProjectLinkerFlags=glew32.lib glew32s.lib
+set ImguiProjectFiles=..\include\imgui\examples\imgui_impl_win32.cpp ..\include\imgui\examples\imgui_impl_opengl3.cpp ..\include\imgui\imgui*.cpp
 
 IF NOT EXIST ..\build  mkdir ..\build
 pushd ..\build
@@ -32,6 +33,6 @@ pushd ..\build
 del *.obj /Q
 
 REM 64 bit build
-cl %CommonCompilerFlags% /I ..\include ..\source\senser_entry.cpp /link %ProjectLinkerFlags% %CommonLinkerFlags% /libpath:..\lib 
+cl %CommonCompilerFlags% /I ..\include ..\source\senser_entry.cpp %ImguiProjectFiles% /link %ProjectLinkerFlags% %CommonLinkerFlags% /libpath:..\lib 
 
 popd

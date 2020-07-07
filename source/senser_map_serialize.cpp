@@ -53,6 +53,8 @@ enclosed u8 WriteMapFile(const char* FileName, quad_position*& Buffer, const s32
                 }
             }
         }
+        
+        Deallocate((u8*)WriteBuffer);
     }
     return false;
 }
@@ -80,6 +82,10 @@ enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer)
                         {
                             printf("Opened filed but got unexpected size of %d. Expected %d.\n", ReadSize, OpenedSize);
                         }
+                        
+                        
+                        // Empty current map for what we are loading now.
+                        memset(QuadPositions, 0, QuadPositionsAllocationSize);
                         
                         char* StartPtr = ReadBuffer;
                         char* Ptr = ReadBuffer;
@@ -130,6 +136,9 @@ enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer)
                                 
                                 const s32 X = atoi(&Start[0]);
                                 const s32 Y = atoi(&End[0]);
+                                
+                                Assert(X < WindowParams.Dimensions.Width);
+                                Assert(Y < WindowParams.Dimensions.Height);
                                 
                                 AddToQuadPositions(V2i(X, Y));
                                 
