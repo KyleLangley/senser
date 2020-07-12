@@ -85,6 +85,9 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
             
             InitTestTriangle();
             
+            // Imgui
+            InitImGUI(WindowHandle);
+            
             return 0;
         } break;
         case WM_CLOSE:
@@ -106,10 +109,13 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
         } break;
         case WM_LBUTTONDOWN:
         {
-            s32 X = SnapToGrid(LOWORD(AdditionalMessageParam), false);
-            s32 Y = SnapToGrid(WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam), true);
-            
-            AddToQuadPositions(V2i(X, Y));
+            if(!App.bEditorActive)
+            {
+                s32 X = SnapToGrid(LOWORD(AdditionalMessageParam), false);
+                s32 Y = SnapToGrid(WindowParams.Dimensions.Y - HIWORD(AdditionalMessageParam), true);
+                
+                AddToQuadPositions(V2i(X, Y));
+            }
         } break;
         case WM_RBUTTONDOWN:
         {
@@ -121,17 +127,20 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
             {
                 case VK_F1:
                 {
-                    WriteMapFile("Testing.map", QuadPositions, QuadPositionsAllocationSize / sizeof(quad_position));
+                    App.bEditorActive = !App.bEditorActive;
+                    //WriteMapFile("Testing.map", QuadPositions, QuadPositionsAllocationSize / sizeof(quad_position));
                 } break;
                 case VK_F2:
                 {
-                    OpenMapFile("Testing.map", QuadPositions);
+                    //OpenMapFile("Testing.map", QuadPositions);
                 } break;
             }
         } break;
         default:
         break;
     }
+    
+    ImGui_ImplWin32_WndProcHandler(WindowHandle, Message, WindowMessageParam, AdditionalMessageParam);
     
     return DefWindowProc(WindowHandle, Message, WindowMessageParam, AdditionalMessageParam);
 }
@@ -175,5 +184,6 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
         }
     }
     
+    CloseImGui();
     return WindowParams.Message.wParam;
 }

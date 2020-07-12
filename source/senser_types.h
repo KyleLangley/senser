@@ -117,12 +117,16 @@ struct timing
 
 global_variable timing Timing;
 
+#include "senser_entry.h"
+
 #include "senser_map_grid.h"
 #include "senser_map_grid.cpp"
 
 #include "senser_gl.h"
 #include "senser_map_serialize.cpp"
+#include "senser_imgui.h"
 #include "senser_gl.cpp"
+#include "senser_imgui.cpp"
 
 #define SENSER_TYPES_H
 #endif

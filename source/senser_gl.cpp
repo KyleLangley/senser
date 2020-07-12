@@ -180,6 +180,11 @@ enclosed void StartFrame()
     Camera.View = LookAt(Camera.Position, AddV3(Camera.Position, Camera.Front), Camera.Up);
     
     TestTriangle();
+    
+    if(App.bEditorActive)
+    {
+        UpdateImGui();
+    }
 }
 
 enclosed void EndFrame()
