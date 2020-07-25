@@ -22,7 +22,9 @@ enclosed u8 WriteMapFile(const char* FileName, quad_position*& Buffer, const s32
                     Assert(QuadPosition->Position.X < WindowParams.Dimensions.Width);
                     Assert(QuadPosition->Position.Y < WindowParams.Dimensions.Height);
                     
-                    sprintf(Temp, SERIALIZE_MAP_VALUE_TOKEN, QuadPosition->Position.X, QuadPosition->Position.Y, QuadPosition->Used);
+                    const s32 QuadPositionIndex = GetQuadPositionsIndexFromPosition(QuadPosition->Position);
+                    
+                    sprintf(Temp, SERIALIZE_MAP_VALUE_TOKEN, QuadPositionIndex);
                     WriteBufferTempPtr += strlen(Temp);
                 }
             }
@@ -83,9 +85,8 @@ enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer)
                             printf("Opened filed but got unexpected size of %d. Expected %d.\n", ReadSize, OpenedSize);
                         }
                         
-                        
                         // Empty current map for what we are loading now.
-                        memset(QuadPositions, 0, QuadPositionsAllocationSize);
+                        ResetQuadPositions();
                         
                         char* StartPtr = ReadBuffer;
                         char* Ptr = ReadBuffer;
@@ -105,12 +106,8 @@ enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer)
                                 
                                 char Start[16];
                                 memset(&Start[0], 0, 16);
-                                char End[16];
-                                memset(&End[0], 0, 16);
                                 char* StartPtr = &Start[0];
-                                char* EndPtr = &End[0];
                                 
-                                u8 Split = false;
                                 for(s32 Index = 0; Index < 32; ++Index)
                                 {
                                     if(PositionBuffer[Index] == ',')
@@ -118,29 +115,11 @@ enclosed void OpenMapFile(const char* FileName, quad_position*& Buffer)
                                         break;
                                     }
                                     
-                                    if(PositionBuffer[Index] == '-')
-                                    {
-                                        Split = true;
-                                        continue;
-                                    }
-                                    
-                                    if(Split)
-                                    {
-                                        *EndPtr++ = PositionBuffer[Index];
-                                    }
-                                    else
-                                    {
-                                        *StartPtr++ = PositionBuffer[Index];
-                                    }
+                                    *StartPtr++ = PositionBuffer[Index];
                                 }
                                 
-                                const s32 X = atoi(&Start[0]);
-                                const s32 Y = atoi(&End[0]);
-                                
-                                Assert(X < WindowParams.Dimensions.Width);
-                                Assert(Y < WindowParams.Dimensions.Height);
-                                
-                                AddToQuadPositions(V2i(X, Y));
+                                const s32 Index = atoi(&Start[0]);
+                                AddToQuadPositionsIndex(Index);
                                 
                                 StartPtr = Ptr;
                             }

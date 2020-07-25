@@ -132,7 +132,7 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
                 } break;
                 case VK_F2:
                 {
-                    //OpenMapFile("Testing.map", QuadPositions);
+                    OpenMapFile("testing.map", QuadPositions);
                 } break;
             }
         } break;
@@ -145,6 +145,16 @@ LRESULT CALLBACK WindowCallback(HWND WindowHandle, UINT Message, WPARAM WindowMe
     return DefWindowProc(WindowHandle, Message, WindowMessageParam, AdditionalMessageParam);
 }
 
+int Zeros(const long V)
+{
+    int R = 0;
+    for(int Index = 5; V / Index >= 1; Index *= 5)
+    {
+        R += V / Index;
+    }
+    return R;
+}
+
 int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR CommandLine, int ShowCommand)
 {
     WindowParams.Class.style = CS_HREDRAW|CS_VREDRAW|CS_OWNDC;
@@ -152,6 +162,9 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
     WindowParams.Class.hCursor = LoadCursor(AppInstance, IDC_ARROW);
     WindowParams.Class.hInstance = AppInstance;
     WindowParams.Class.lpszClassName = "SenserWindowClass";
+    
+    int T = Zeros(20);
+    int T2 = Zeros(34866);
     
     if(RegisterClass(&WindowParams.Class))
     {
@@ -187,3 +200,6 @@ int CALLBACK WinMain(HINSTANCE AppInstance, HINSTANCE AppPrevInstance, LPSTR Com
     CloseImGui();
     return WindowParams.Message.wParam;
 }
+
+
+

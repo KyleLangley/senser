@@ -32,6 +32,12 @@ enclosed void InitTestTriangle()
     QuadPositionsAllocationSize = (GRID_COUNT_X * GRID_COUNT_Y) * sizeof(quad_position);
     QuadPositions = (quad_position*)Allocate(QuadPositionsAllocationSize);
     
+    for(s32 Index = 0; Index < QuadPositionsAllocationSize / sizeof(quad_position); ++Index)
+    {
+        QuadPositions[Index].Position.X = (Index % GRID_COUNT_X) * GRID_SIZE;
+        QuadPositions[Index].Position.Y = (Index / GRID_COUNT_X) * GRID_SIZE;
+    }
+    
     QuadShader.VertexID = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(QuadShader.VertexID, 1, &VertexShaderSource, nullptr);
     glCompileShader(QuadShader.VertexID);
@@ -140,12 +146,23 @@ enclosed void TestTriangle()
     }
 }
 
+enclosed s32 GetQuadPositionsIndexFromPosition(const v2i Position)
+{
+    const s32 X = Position.X / GRID_SIZE;
+    const s32 Y = Position.Y / GRID_SIZE;
+    
+    return ((WindowParams.Dimensions.Width / GRID_SIZE) * (Y - 1)) + X;
+}
+
+enclosed void AddToQuadPositionsIndex(const s32 Index)
+{
+    Assert(Index <= QuadPositionsAllocationSize / sizeof(quad_position));
+    QuadPositions[Index].Used = true;
+}
+
 enclosed void AddToQuadPositions(const v2i NewPosition)
 {
-    const s32 X = NewPosition.X / GRID_SIZE;
-    const s32 Y = NewPosition.Y / GRID_SIZE;
-    
-    const s32 Index = ((WindowParams.Dimensions.Width / GRID_SIZE) * (Y - 1)) + X;
+    const s32 Index = GetQuadPositionsIndexFromPosition(NewPosition);
     
     if(QuadPositions[Index].Used)
     {
@@ -155,6 +172,14 @@ enclosed void AddToQuadPositions(const v2i NewPosition)
     {
         QuadPositions[Index].Position = V2i(NewPosition.X, NewPosition.Y);
         QuadPositions[Index].Used = true;
+    }
+}
+
+enclosed void ResetQuadPositions()
+{
+    for(s32 Index = 0; Index < QuadPositionsAllocationSize / sizeof(quad_position); ++Index)
+    {
+        QuadPositions[Index].Used = false;
     }
 }
 

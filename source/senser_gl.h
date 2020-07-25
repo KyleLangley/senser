@@ -103,7 +103,10 @@ enclosed s32 QuadPositionsAllocationSize;
 enclosed void InitTestTriangle();
 enclosed void TestTriangle();
 
+enclosed void AddToQuadPositionsIndex(const s32 Index);
+enclosed s32 GetQuadPositionsIndexFromPosition(const v2i Position);
 enclosed void AddToQuadPositions(const v2i NewPosition);
+enclosed void ResetQuadPositions();
 enclosed void CheckShader(const s32 ID);
 enclosed void CheckProgram(const s32 ID);
 

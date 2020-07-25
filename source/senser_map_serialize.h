@@ -6,7 +6,7 @@
 #define GetCurrentDir _getcwd
 #define MAX_WINDOWS_PATH_LENGTH MAX_PATH
 
-#define SERIALIZE_MAP_VALUE_TOKEN "%d-%d,"
+#define SERIALIZE_MAP_VALUE_TOKEN "%d,"
 
 enclosed char* GetWorkingDirectory();
 enclosed char* GetRelativeDirectoryFromName(const char* DirectoryName);

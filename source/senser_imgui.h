@@ -11,5 +11,7 @@ enclosed void InitImGUI(void* Hwnd);
 enclosed void CloseImGui();
 enclosed void UpdateImGui();
 
+enclosed bool SaveMenuOpen;
+
 #define SENSER_IMGUI_H
 #endif
